@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 employees = [
     {"id": 1, "name": "Rahul", "department": "IT"},
-    {"id": 2, "name": "Priya", "department": "HR"},
+    {"id": 2, "name": "JP", "department": "HR"},
     {"id": 3, "name": "Yogesh", "department": "DevOps"}
 ]
 
