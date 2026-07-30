@@ -3,7 +3,7 @@ from flask import Flask, render_template
 app = Flask(__name__)
 
 employees = [
-    {"id": 1, "name": "Rahul", "department": "IT"},
+    {"id": 1, "name": "Samarit", "department": "IT"},
     {"id": 2, "name": "JP", "department": "HR"},
     {"id": 3, "name": "Yogesh", "department": "DevOps"},
     {"id": 4, "name": "Shreya", "department": "Computer"},
