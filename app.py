@@ -7,7 +7,7 @@ employees = [
     {"id": 2, "name": "JP", "department": "HR"},
     {"id": 3, "name": "Yogesh", "department": "DevOps"},
     {"id": 4, "name": "Shreya", "department": "Computer"},
-    {"id": 5, "name": "Piyu", "department": "Computer"},
+    {"id": 5, "name": "Piyu", "department": "IT"},
     {"id": 6, "name": "Veda", "department": "Computer"}
 ]
 
