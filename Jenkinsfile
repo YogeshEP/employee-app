@@ -1,37 +1,63 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = "employee-app:latest"
+    }
+
     stages {
 
-        stage('Clone Repository') {
+        stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/YogeshEP/employee-app.git'
+                checkout scm
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 sh '''
-                docker build -t employee-app:latest .
+                docker build -t ${IMAGE_NAME} .
                 '''
             }
         }
 
-        stage('Deploy Container') {
+        stage('Export Docker Image') {
             steps {
                 sh '''
-                docker stop employee-container || true
-                docker rm employee-container || true
-
-                docker run -d \
-                  --name employee-container \
-                  -p 5000:5000 \
-                  employee-app:latest
-
-                docker ps
+                docker save ${IMAGE_NAME} -o k8s/employee-app.tar
                 '''
             }
+        }
+
+        stage('Import Image into K3s') {
+            steps {
+                sh '''
+                sudo k3s ctr images import k8s/employee-app.tar
+                '''
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                kubectl apply -f k8s/namespace.yaml
+                kubectl apply -f k8s/deployment.yaml
+                kubectl apply -f k8s/service.yaml
+
+                kubectl rollout restart deployment employee-app -n employee
+                kubectl rollout status deployment employee-app -n employee
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Deployment completed successfully!"
+        }
+
+        failure {
+            echo "Deployment failed!"
         }
     }
 }
