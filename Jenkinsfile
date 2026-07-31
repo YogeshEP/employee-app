@@ -37,15 +37,12 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Deploy with Helm') {
             steps {
                 sh '''
-                    sudo kubectl apply -f k8s/namespace.yaml
-                    sudo kubectl apply -f k8s/deployment.yaml
-                    sudo kubectl apply -f k8s/service.yaml
-
-                    sudo kubectl rollout restart deployment/employee-app -n employee
-                    sudo kubectl rollout status deployment/employee-app -n employee
+                    sudo helm upgrade --install employee-app \
+                    helm/employee-app \
+                    -n employee
                 '''
             }
         }
@@ -53,7 +50,7 @@ pipeline {
         stage('Verify Deployment') {
             steps {
                 sh '''
-                    sudo kubectl get nodes
+                    sudo helm list -n employee
                     sudo kubectl get pods -n employee
                     sudo kubectl get svc -n employee
                     sudo kubectl get deployment -n employee
@@ -65,13 +62,13 @@ pipeline {
     post {
         success {
             echo '====================================='
-            echo 'Deployment Successful!'
+            echo 'Helm Deployment Successful!'
             echo '====================================='
         }
 
         failure {
             echo '====================================='
-            echo 'Deployment Failed!'
+            echo 'Helm Deployment Failed!'
             echo '====================================='
         }
 
