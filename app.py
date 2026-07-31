@@ -3,13 +3,14 @@ from flask import Flask, render_template
 app = Flask(__name__)
 
 employees = [
-    {"id": 1, "name": "Samarit", "department": "IT"},
+    {"id": 1, "name": "Samarjit", "department": "IT"},
     {"id": 2, "name": "JP", "department": "HR"},
     {"id": 3, "name": "Yogesh", "department": "DevOps"},
     {"id": 4, "name": "Shreya", "department": "Computer"},
     {"id": 5, "name": "Piyu", "department": "IT"},
     {"id": 6, "name": "Veda", "department": "Computer"},
-    {"id": 7, "name": "Devesh", "department": "Mechanical"}
+    {"id": 7, "name": "Devesh", "department": "Mechanical"},
+    {"id": 7, "name": "Pratik", "department": "Civil"}
 ]
 
 @app.route("/")
