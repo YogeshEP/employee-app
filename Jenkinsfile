@@ -3,7 +3,11 @@ pipeline {
 
     environment {
         IMAGE_NAME = "employee-app:latest"
-        TAR_FILE = "/tmp/employee-app.tar"
+        IMAGE_TAR = "/tmp/employee-app.tar"
+        NAMESPACE = "employee"
+        RELEASE_NAME = "employee-app"
+        HELM_CHART = "helm/employee-app"
+        KUBECONFIG = "/var/lib/jenkins/.kube/config"
     }
 
     stages {
@@ -16,15 +20,17 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t ${IMAGE_NAME} .'
+                sh '''
+                docker build -t ${IMAGE_NAME} .
+                '''
             }
         }
 
         stage('Export Docker Image') {
             steps {
                 sh '''
-                    rm -f ${TAR_FILE}
-                    docker save ${IMAGE_NAME} -o ${TAR_FILE}
+                rm -f ${IMAGE_TAR}
+                docker save ${IMAGE_NAME} -o ${IMAGE_TAR}
                 '''
             }
         }
@@ -32,7 +38,7 @@ pipeline {
         stage('Import Image into K3s') {
             steps {
                 sh '''
-                    sudo k3s ctr images import ${TAR_FILE}
+                sudo k3s ctr images import ${IMAGE_TAR}
                 '''
             }
         }
@@ -40,9 +46,10 @@ pipeline {
         stage('Deploy with Helm') {
             steps {
                 sh '''
-                    sudo helm upgrade --install employee-app \
-                    helm/employee-app \
-                    -n employee
+                sudo env KUBECONFIG=${KUBECONFIG} \
+                /usr/local/bin/helm upgrade --install ${RELEASE_NAME} \
+                ${HELM_CHART} \
+                -n ${NAMESPACE}
                 '''
             }
         }
@@ -50,19 +57,50 @@ pipeline {
         stage('Verify Deployment') {
             steps {
                 sh '''
-                    sudo helm list -n employee
-                    sudo kubectl get pods -n employee
-                    sudo kubectl get svc -n employee
-                    sudo kubectl get deployment -n employee
+                echo "=============================="
+                echo "Helm Releases"
+                echo "=============================="
+
+                sudo env KUBECONFIG=${KUBECONFIG} \
+                /usr/local/bin/helm list -n ${NAMESPACE}
+
+                echo ""
+                echo "=============================="
+                echo "Pods"
+                echo "=============================="
+
+                sudo kubectl get pods -n ${NAMESPACE}
+
+                echo ""
+                echo "=============================="
+                echo "Services"
+                echo "=============================="
+
+                sudo kubectl get svc -n ${NAMESPACE}
+
+                echo ""
+                echo "=============================="
+                echo "Deployments"
+                echo "=============================="
+
+                sudo kubectl get deployment -n ${NAMESPACE}
                 '''
             }
         }
     }
 
     post {
+
+        always {
+            sh '''
+            rm -f ${IMAGE_TAR}
+            '''
+        }
+
         success {
             echo '====================================='
-            echo 'Helm Deployment Successful!'
+            echo 'CI/CD Pipeline Completed Successfully!'
+            echo 'Application Deployed using Helm'
             echo '====================================='
         }
 
@@ -70,10 +108,6 @@ pipeline {
             echo '====================================='
             echo 'Helm Deployment Failed!'
             echo '====================================='
-        }
-
-        always {
-            sh 'rm -f ${TAR_FILE}'
         }
     }
 }
