@@ -9,7 +9,7 @@ employees = [
     {"id": 4, "name": "Shreya", "department": "Computer"},
     {"id": 5, "name": "Piyu", "department": "IT"},
     {"id": 6, "name": "Veda", "department": "Computer"},
-    {"id": 7, "name": "Dev", "department": "Mechanical"}
+    {"id": 7, "name": "Devesh", "department": "Mechanical"}
 ]
 
 @app.route("/")
